@@ -10,7 +10,7 @@ const props = defineProps({
 
 const dialog = ref(false);
 const selectedSkill = ref(null);
-const longPressTimeout = ref(null); 
+const longPressTimeout = ref(null);
 
 const openDialog = (skill) => {
   selectedSkill.value = skill;
@@ -21,14 +21,10 @@ const closeDialog = () => {
   dialog.value = false;
 };
 
-const onMouseDown = (skill) => {
-  longPressTimeout.value = setTimeout(() => {
-    openDialog(skill);
-  }, 300); 
-};
-
-const onMouseUp = () => {
-  if (longPressTimeout.value) {
+const handleMouse = (action, skill = null) => {
+  if (action === 'down') {
+    longPressTimeout.value = setTimeout(() => openDialog(skill), 300);
+  } else {
     clearTimeout(longPressTimeout.value);
   }
 };
@@ -38,30 +34,22 @@ const onMouseUp = () => {
   <div class="dropdown-container">
     <v-menu activator="parent" offset-y>
       <template v-slot:activator="{ on, attrs }">
-        <v-btn color="#ffb703" v-bind="attrs" v-on="on">Compétences</v-btn>
+        <v-btn color="#0077b6" v-bind="attrs" v-on="on" class="activator-btn">Compétences</v-btn>
       </template>
 
-      <v-list
-        class="text-capitalize ml-4 mt-3 pa-0"
-        style="background: none; box-shadow: none"
-      >
+      <v-list class="skill-list" style="background: none; box-shadow: none;">
         <v-list-item
           v-for="(skill, index) in skills"
           :key="index"
-          @mousedown="onMouseDown(skill)"  
-          @mouseup="onMouseUp"            
-          @mouseleave="onMouseUp"          
-          class="rounded-lg"
-          style="background-color: #ffb703; margin-bottom: 10px; cursor: pointer;"
+          @mousedown="handleMouse('down', skill)"
+          @mouseup="handleMouse('up')"
+          @mouseleave="handleMouse('up')"
+          class="skill-item rounded-lg ms-3"
         >
-          <v-list-item-title>
+          <v-list-item-title class="skill-title">
             {{ skill.name }}
             <span v-for="n in skill.cost_pa" :key="n">
-              <img
-                src="/assets/icons/energie-icon.png"
-                alt="energie"
-                style="height: 14px; margin-left: 2px"
-              />
+              <img src="/assets/icons/energie-icon.png" alt="energie" class="energie-icon"/>
             </span>
           </v-list-item-title>
         </v-list-item>
@@ -73,10 +61,7 @@ const onMouseUp = () => {
         <v-card-title class="custom-title">{{ selectedSkill?.name }}</v-card-title>
         <v-card-text class="custom-text">
           <p><strong>Dégâts :</strong> {{ selectedSkill?.damage }}</p>
-          <p>
-            <strong>Points d'action nécessaires :</strong>
-            {{ selectedSkill?.cost_pa }}
-          </p>
+          <p><strong>Points d'action nécessaires :</strong> {{ selectedSkill?.cost_pa }}</p>
           <p><strong>Description :</strong> {{ selectedSkill?.description }}</p>
         </v-card-text>
         <v-card-actions>
@@ -95,20 +80,43 @@ const onMouseUp = () => {
   transform: translateY(-50%);
 }
 
-/* pop-up */
+.activator-btn {
+  border: 1px solid #03045e;
+}
+
+.skill-list {
+  background: none;
+  box-shadow: none;
+}
+
+.skill-item {
+  background-color: #0077b6;
+  border: 1px solid #03045e;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.skill-title {
+  color: white;
+}
+
+.energie-icon {
+  height: 14px;
+  margin-left: 2px;
+}
+
 .custom-dialog {
-  background-color: #1d3557;
-  color: #f1faee;
+  background-color: #0077b6;
+  color: white;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.25);
+  border: 3px solid #03045e;
 }
 
 .custom-title {
   font-size: 20px;
   font-weight: bold;
-  color: #a8dadc;
-  border-bottom: 2px solid #457b9d;
+  border-bottom: 2px solid #03045e;
 }
 
 .custom-text {
@@ -117,6 +125,10 @@ const onMouseUp = () => {
 }
 
 .close-btn {
+  background-color: #03045e;
+}
+
+.close-btn:hover {
   background-color: #e63946;
   color: white;
   font-weight: bold;
